@@ -139,12 +139,12 @@ display(features_raw.head(n = 1))
 #  - Convert the target label `'income_raw'` to numerical entries.
 #    - Set records with "<=50K" to `0` and records with ">50K" to `1`.
 
-# In[6]:
+# In[7]:
 
 # TODO: One-hot encode the 'features_raw' data using pandas.get_dummies()
-categorical = ['workclass', 'education_level', 'marital-status', 'occupation', 
-               'relationship' ,'race', 'sex', 'native-country']
-features = pd.get_dummies(features_raw[categorical])
+# categorical = ['workclass', 'education_level', 'marital-status', 'occupation', 
+#               'relationship' ,'race', 'sex', 'native-country']
+features = pd.get_dummies(features_raw)
 
 # TODO: Encode the 'income_raw' data to numerical values
 income = income_raw.apply(lambda x: 0 if x == '<=50K' else 1)
@@ -162,7 +162,7 @@ print encoded
 # 
 # Run the code cell below to perform this split.
 
-# In[7]:
+# In[8]:
 
 # Import train_test_split
 from sklearn.cross_validation import train_test_split
@@ -193,7 +193,7 @@ print "Testing set has {} samples.".format(X_test.shape[0])
 # *If we chose a model that always predicted an individual made more than \$50,000, what would that model's accuracy and F-score be on this dataset?*  
 # **Note:** You must use the code cell below and assign your results to `'accuracy'` and `'fscore'` to be used later.
 
-# In[8]:
+# In[9]:
 
 # TODO: Calculate accuracy
 from sklearn.metrics import accuracy_score
@@ -324,7 +324,7 @@ print "Naive Predictor: [Accuracy score: {:.4f}, F-score: {:.4f}]".format(accura
 #  - Calculate the F-score for both the training subset and testing set.
 #    - Make sure that you set the `beta` parameter!
 
-# In[9]:
+# In[10]:
 
 def train_predict(learner, sample_size, X_train, y_train, X_test, y_test): 
     '''
@@ -387,7 +387,7 @@ def train_predict(learner, sample_size, X_train, y_train, X_test, y_test):
 # 
 # **Note:** Depending on which algorithms you chose, the following implementation may take some time to run!
 
-# In[10]:
+# In[11]:
 
 # TODO: Import the three supervised learning models from sklearn
 from sklearn.naive_bayes import GaussianNB
@@ -460,7 +460,7 @@ vs.evaluate(results, accuracy, fscore)
 # 
 # **Note:**
 # - I focused mainly on the results that came out of the whole training and testing set.
-# - I believe that the LogisticRegression classifier deserves a shot.
+# - **I believe that the LogisticRegression classifier deserves a shot.** So, i will check logistic regression too.
 
 # ### Question 4 - Describing the Model in Layman's Terms
 # *In one to two paragraphs, explain to *CharityML*, in layman's terms, how the final model chosen is supposed to work. Be sure that you are describing the major qualities of the model, such as how the model is trained and how the model makes a prediction. Avoid using advanced mathematical or technical jargon, such as describing equations or discussing the algorithm implementation.*
@@ -486,19 +486,22 @@ vs.evaluate(results, accuracy, fscore)
 # 
 # **Note:** Depending on the algorithm chosen and the parameter list, the following implementation may take some time to run!
 
-# In[12]:
+# In[20]:
 
 # TODO: Import 'GridSearchCV', 'make_scorer', and any other necessary libraries
 from sklearn.grid_search import GridSearchCV
 from sklearn.metrics import make_scorer
 
 # TODO: Initialize the classifier
-clf = SVC(random_state = 0)
+clf = LogisticRegression()
+#clf = SVC(random_state = 0)
 
 # TODO: Create the parameters list you wish to tune
-# parameters = {'penalty':('l1', 'l2'), 'C':[1, 10], 'verbose':[0,5]}
-parameters =  [{'C': [1, 10, 100, 1000], 'kernel': ['linear']},
-               {'C': [1, 10, 100, 1000], 'gamma': [0.001, 0.0001], 'kernel': ['rbf']},]
+# Parameters for Logistic Regression
+parameters = {'penalty':('l1', 'l2'), 'C': [0.001, 0.01, 0.1, 1, 10, 100, 1000]}
+# Parameters for SVC
+#parameters =  [{'C': [1, 10, 100, 1000], 'kernel': ['linear']},
+#               {'C': [1, 10, 100, 1000], 'gamma': [0.001, 0.0001], 'kernel': ['rbf']},]
 
 # TODO: Make an fbeta_score scoring object
 scorer = make_scorer(fbeta_score, beta=0.5)
@@ -529,17 +532,28 @@ print "Final F-score on the testing data: {:.4f}".format(fbeta_score(y_test, bes
 # _What is your optimized model's accuracy and F-score on the testing data? Are these scores better or worse than the unoptimized model? How do the results from your optimized model compare to the naive predictor benchmarks you found earlier in **Question 1**?_  
 # **Note:** Fill in the table below with your results, and then provide discussion in the **Answer** box.
 
-# #### Results:
+# #### Results of SVC:
 # 
 # |     Metric     | Benchmark Predictor | Unoptimized Model | Optimized Model |
 # | :------------: | :-----------------: | :---------------: | :-------------: | 
-# | Accuracy Score |       0.2478        |       0.8242      |      0.8231     |
-# | F-score        |       0.2917        |       0.6432      |      0.6410     |
+# | Accuracy Score |       0.2478        |       0.8301     |      0.8464     |
+# | F-score        |       0.2917        |       0.6592      |      0.6998     |
+# 
+# #### Results of LogisticRegression:
+# 
+# |     Metric     | Benchmark Predictor | Unoptimized Model | Optimized Model |
+# | :------------: | :-----------------: | :---------------: | :-------------: | 
+# | Accuracy Score |       0.2478        |       0.8483      |      0.8484     |
+# | F-score        |       0.2917        |       0.6993      |      0.6998     |
+# 
+# 
 # 
 
 # **Answer: **
 # - Compared to naive predictor the performance of the model is extraordinary.
-# - The optimized model performs a little bit less good (really small - negligible difference in scores) than the unoptimized performance. We should consider that grid search checks the model in order to avoid overfitting. 
+# - For SVC: The optimized model performs a little bit better.
+# - For LogisticRegression: There is a negligible improvement, practical the performance is the same.
+# - **Finally** logistic regression wins the fight. The model is significantly faster (training time).
 
 # ----
 # ## Feature Importance
@@ -554,7 +568,7 @@ print "Final F-score on the testing data: {:.4f}".format(fbeta_score(y_test, bes
 
 # **Answer:**
 # - All features (98 total features after one-hot encoding):
-#     - age (39, 50, 38, etc.)
+#     - **age** (39, 50, 38, etc.)
 #     - workclass (State-gov, self-emp, private, etc.)
 #     - **educational_level** (Bachelors, Masters, Doctorate, 9th, etc.)
 #     - education-num (13.0, 9.0, 14.0, etc.)
@@ -562,22 +576,22 @@ print "Final F-score on the testing data: {:.4f}".format(fbeta_score(y_test, bes
 #     - **occupation** (Prof-specialty, Handlers-cleaners, Exec-managerial, etc.)
 #     - relationship (Not-in-family, Husband, Wife, etc.)
 #     - race (White, Black)
-#     - **sex** (Male, Female)
+#     - sex (Male, Female)
 #     - **capital-gain** (2174.0, 0.0, 14084.0, etc.)
-#     - capital-loss (0.0, 2042.0, etc.)
+#     - **capital-loss** (0.0, 2042.0, etc.)
 #     - **hours-per-week** (40.0, 13.0, 45.0, etc.)
 #     - native-country (United States, Cuba, Jamaica, etc.)
 # - Most important for prediction (ranking):
-#     - occupation
-#         - Some jobs are generally more well-paid than others.
-#     - educational-level
-#         - People with higher educational level (Masters or PhD) tend to earn more money.
+#     - capital-loss
+#         - When your capital reduces, you probably don't make good economic decisions. 
 #     - capital-gain
 #         - When your capital grows, you probably earn more money.
+#     - age
+#         - Older people tend to earn more money, because they have probably developed an professional career.
 #     - hours-per-week
 #         - The more you work, the more you earn. Someone who works many hours has a tendency to earn more than 50K.
-#     - sex
-#         - Based on researches male tend to earn better job positions in businesses. Unfortunately racism is still out there.
+#     - educational-level
+#         - People with higher educational level (Masters or PhD) tend to earn more money.
 
 # ### Implementation - Extracting Feature Importance
 # Choose a `scikit-learn` supervised learning algorithm that has a `feature_importance_` attribute availble for it. This attribute is a function that ranks the importance of each feature when making predictions based on the chosen algorithm.
@@ -587,7 +601,7 @@ print "Final F-score on the testing data: {:.4f}".format(fbeta_score(y_test, bes
 #  - Train the supervised model on the entire training set.
 #  - Extract the feature importances using `'.feature_importances_'`.
 
-# In[14]:
+# In[18]:
 
 # TODO: Import a supervised learning model that has 'feature_importances_'
 clf = AdaBoostClassifier()
@@ -609,18 +623,18 @@ vs.feature_plot(importances, X_train, y_train)
 
 # **Answer:**
 # - The five most relevant features for predicting if an individual makes at most or above $50,000 are:
-#     - sex_Female
-#     - occupation_Prof-specialty
-#     - occupation_Exec-managerial
-#     - relationship_Husband
-#     - occupation_Other-service
-# - I am close to the same answer. Based on model feature extraction the most important features are sex(5th in my ranking), occupation(1st in my ranking) and relationship(not in my ranking).
-# - I don't know why the model thinks that relationship feature is important. Maybe a husband has a more stable life with good job. 
+#     - capital-loss
+#     - age
+#     - capital-gain
+#     - hours-per-week
+#     - education-num
+# - I am close to the same answer. Based on model feature extraction the most important features are capital-loss(1st in my ranking), age(3rd in my ranking), capital-gain(2nd in my ranking), hours-per-week(4th in my ranking) and education-num(not in my ranking). 
+# - Intuition about the feature importances in any ML problem is a good initial approach, but a thorough method, like the one here employed, is a better approach since its conclusions are based on the data relations between features and label. This is a general rule in any ML problem, feature selection is critical and should be mostly based on mathematical methods instead of intuition.
 
 # ### Feature Selection
 # How does a model perform if we only use a subset of all the available features in the data? With less features required to train, the expectation is that training and prediction time is much lower — at the cost of performance metrics. From the visualization above, we see that the top five most important features contribute more than half of the importance of **all** features present in the data. This hints that we can attempt to *reduce the feature space* and simplify the information required for the model to learn. The code cell below will use the same optimized model you found earlier, and train it on the same training set *with only the top five important features*. 
 
-# In[15]:
+# In[19]:
 
 # Import functionality for cloning a model
 from sklearn.base import clone
@@ -649,14 +663,19 @@ print "F-score on testing data: {:.4f}".format(fbeta_score(y_test, reduced_predi
 # *If training time was a factor, would you consider using the reduced data as your training set?*
 
 # **Answer:**
-# - The performance of the model is not so good.
+# - The performance of the model is still good.
 #     - Final Model trained on full data:
-#         - Acc. --> 0.8231
-#         - F-score --> 0.6410
+#         - Acc. --> 0.8484 (0.8464)
+#         - F-score --> 0.6998 (0.6998)
 #     - Final Model trained on reduced data:
-#         - Acc. --> 0.8062
-#         - F-score --> 0.5882
+#         - Acc. --> 0.8105 (0.7954)
+#         - F-score --> 0.6034 (0.5414)
+# 
 # - The performance of the model trained on reduced is still good. If the training time is critical i would consider using the reduced data as my training set. It's all about a trade-off. If you want to gain maximum performance you should train your model really good, but it's very important to be careful with the overfitting problem.
+# 
+# **Note:** In parentheses there are the values for SVM model.
+# 
+# **Note:**Feature selection process is key in Machine Learning problems, the idea behind it is that you want to have the minimum number of features than capture trends and patterns in your data. A good feature set contains features that are highly correlated with the class, yet uncorrelated with each other. Your machine learning algorithm is just going to be as good as the features you put into it. For that reason, this is definitely a critical step into any ML problem. In this case, there are not significant differences in terms of performance, but in terms of computational costs and interpretability, there is a significant gain!
 
 # > **Note**: Once you have completed all of the code implementations and successfully answered each question above, you may finalize your work by exporting the iPython Notebook as an HTML document. You can do this by using the menu above and navigating to  
 # **File -> Download as -> HTML (.html)**. Include the finished document along with this notebook as your submission.
